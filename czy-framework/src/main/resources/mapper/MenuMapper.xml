@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czy.mapper.MenuMapper">
+
+    <select id="getPermissions" resultType="java.lang.String">
+        <!--1.根据用户id查询，用户的角色id
+            2.根据角色id，才能查询到menu_id
+            3.根据menu_id查询perms，返回链表-->
+        select sm.perms
+        from sys_user su
+        left join sys_user_role sur on sur.user_id = su.id
+        left join sys_role_menu srm on srm.role_id = sur.role_id
+        left join sys_menu sm on sm.id = srm.menu_id
+        where su.id = ${id} and
+        sm.menu_type IN('C', 'M') and
+        sm.status = 0 and sm.del_flag = 0
+    </select>
+
+    <select id="getRoles" resultType="java.lang.String">
+        select sr.role_key
+        from sys_user su
+                 join sys_user_role sur on su.id = sur.user_id
+                 join sys_role sr on sr.id = sur.role_id
+        where su.id = ${id} and su.del_flag = 0 and su.status = 0;
+    </select>
+
+    <select id="getRouters" resultType="com.czy.domain.vo.MenuVO">
+        select sm.id, sm.menu_name, sm.parent_id, sm.order_num, sm.path, sm.component, sm.is_frame, sm.menu_type, sm.visible, sm.status, sm.perms, sm.icon, sm.create_by, sm.create_time, sm.update_by, sm.update_time, sm.remark, sm.del_flag
+        from sys_user su
+                 left join sys_user_role sur on su.id = sur.user_id
+                 left join sys_role_menu srm on sur.role_id = srm.role_id
+                 left join sys_menu sm on srm.menu_id = sm.id
+        where su.id = ${userId}
+          and sm.menu_type IN('C', 'M')
+          and sm.status = 0 and sm.del_flag = 0
+        ORDER BY
+            sm.parent_id,sm.order_num;
+    </select>
+
+    <select id="getAllRouters" resultType="com.czy.domain.vo.MenuVO">
+        select sm.id, sm.menu_name, sm.parent_id, sm.order_num, sm.path, sm.component, sm.is_frame, sm.menu_type, sm.visible, sm.status, sm.perms, sm.icon, sm.create_by, sm.create_time, sm.update_by, sm.update_time, sm.remark, sm.del_flag
+        from sys_menu sm
+        where sm.menu_type IN('C', 'M')
+        and sm.status = 0 and sm.del_flag = 0
+        ORDER BY
+            sm.parent_id,sm.order_num;
+    </select>
+</mapper>
